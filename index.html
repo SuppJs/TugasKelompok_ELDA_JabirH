@@ -1,125 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monitoring Gempa Jawa & Bali</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Panel Surya - Simulasi</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
-      background: #111;
-      color: #eee;
-      font-family: Arial;
+      background: #f5f5f5;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    h2 {
       text-align: center;
-      padding: 20px;
+      margin-bottom: 10px;
     }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
     }
-
-    .chart-box {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
+    .box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <h1>Monitoring Gempa Bumi Jawa & Bali</h1>
-  <p>Data diambil dari BMKG setiap 30 detik</p>
+<h2>Monitoring Panel Surya - Gauge + Grafik</h2>
 
-  <div class="container">
-    <div class="chart-box">
-      <canvas id="gempaChart"></canvas>
-    </div>
+<div class="row">
+
+  <!-- Intensitas Cahaya -->
+  <div class="box">
+    <canvas id="gaugeCahaya" width="160" height="400"
+      data-type="linear-gauge"
+      data-min-value="0"
+      data-max-value="1000"
+      data-major-ticks="0,200,400,600,800,1000"
+      data-units="Lux"
+      data-title="Intensitas Cahaya"
+      data-bar-width="15"
+      data-glow="true">
+    </canvas>
   </div>
 
-  <script>
-    // ---------------- CHART -----------------------
-    const ctx = document.getElementById("gempaChart").getContext("2d");
+  <!-- Tegangan Panel -->
+  <div class="box">
+    <canvas id="gaugeVPanel" width="250" height="250"
+      data-type="radial-gauge"
+      data-min-value="0"
+      data-max-value="30"
+      data-major-ticks="0,5,10,15,20,25,30"
+      data-title="Tegangan Panel Surya"
+      data-units="V"
+      data-animation="true"
+      data-glow="true">
+    </canvas>
+  </div>
 
-    const chartData = {
-      labels: [],
-      datasets: [
-        {
-          label: "Magnitudo (M)",
-          borderColor: "rgb(255, 100, 100)",
-          borderWidth: 2,
-          data: []
-        },
-        {
-          label: "Kedalaman (Km)",
-          borderColor: "rgb(100, 200, 255)",
-          borderWidth: 2,
-          data: []
-        }
-      ]
-    };
+  <!-- Arus Beban -->
+  <div class="box">
+    <canvas id="gaugeArus" width="250" height="250"
+      data-type="radial-gauge"
+      data-min-value="0"
+      data-max-value="20"
+      data-major-ticks="0,4,8,12,16,20"
+      data-title="Arus Beban"
+      data-units="A"
+      data-animation="true"
+      data-glow="true">
+    </canvas>
+  </div>
 
-    const gempaChart = new Chart(ctx, {
-      type: "line",
-      data: chartData,
-      options: {
-        responsive: true,
-        animation: false,
-        scales: {
-          y: {
-            beginAtZero: false
-          }
-        }
-      }
+</div>
+
+<!-- HANYA GRAFIK SAJA -->
+<div class="row">
+  <div class="box"><canvas id="chartCahaya" width="350" height="200"></canvas><h3>Grafik Intensitas Cahaya</h3></div>
+  <div class="box"><canvas id="chartVPanel" width="350" height="200"></canvas><h3>Grafik Tegangan Panel</h3></div>
+  <div class="box"><canvas id="chartArus" width="350" height="200"></canvas><h3>Grafik Arus Beban</h3></div>
+  <div class="box"><canvas id="chartFrek" width="350" height="200"></canvas><h3>Grafik Frekuensi</h3></div>
+</div>
+
+
+<script>
+window.onload = function () {
+
+  // GAUGES
+  let gCahaya = document.gauges.get('gaugeCahaya');
+  let gVPanel = document.gauges.get('gaugeVPanel');
+  let gArus   = document.gauges.get('gaugeArus');
+
+  // CHART CREATOR
+  function createChart(id, min, max) {
+    return new Chart(document.getElementById(id).getContext("2d"), {
+      type: 'line',
+      data: {
+        labels: Array(20).fill(""),
+        datasets: [{
+          data: Array(20).fill(0),
+          borderWidth: 2,
+          tension: 0.3
+        }]
+      },
+      options: { animation: false, scales: { y: { min, max }} }
     });
+  }
 
+  let chartCahaya = createChart("chartCahaya", 0, 1000);
+  let chartVPanel = createChart("chartVPanel", 0, 30);
+  let chartArus   = createChart("chartArus", 0, 20);
+  let chartFrek   = createChart("chartFrek", 40, 60);
 
-    // --------------- GET DATA BMKG ---------------
-    async function ambilDataGempa() {
-      try {
-        const response = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json");
-        const data = await response.json();
+  // UPDATE LOOP (3 detik)
+  setInterval(() => {
 
-        const list = data.Infogempa.gempa;
+    let cahaya = Math.random() * 1000;
 
-        // Filter wilayah Jawa dan Bali
-        const wilayahFilter = ["JAWA", "JAWA", "BALI"];
+    // PEMBULATAN HANYA 1 DIGIT DI BELAKANG KOMA
+    let vpanel = ((cahaya / 1000) * 30).toFixed(1);
+    let arus   = ((vpanel / 30) * 10).toFixed(1);
+    let frek   = 50.0;
 
-        const terbaru = list.filter(g =>
-          g.Wilayah.toUpperCase().includes("JAWA") ||
-          g.Wilayah.toUpperCase().includes("BALI")
-        )[0];
+    // Update Gauges
+    gCahaya.value = cahaya;
+    gVPanel.value = Number(vpanel);
+    gArus.value   = Number(arus);
 
-        if (!terbaru) return;
-
-        const waktu = terbaru.Jam;
-        const magnitudo = parseFloat(terbaru.Magnitude);
-        const kedalaman = parseFloat(terbaru.Kedalaman);
-
-        // Masukkan ke chart
-        chartData.labels.push(waktu);
-        chartData.datasets[0].data.push(magnitudo);
-        chartData.datasets[1].data.push(kedalaman);
-
-        if (chartData.labels.length > 20) {
-          chartData.labels.shift();
-          chartData.datasets.forEach(ds => ds.data.shift());
-        }
-
-        gempaChart.update();
-
-      } catch (error) {
-        console.log("Gagal ambil data:", error);
-      }
+    // Update Grafik
+    function push(chart, val) {
+      chart.data.datasets[0].data.shift();
+      chart.data.datasets[0].data.push(val);
+      chart.update();
     }
 
-    // Update setiap 30 detik
-    ambilDataGempa();
-    setInterval(ambilDataGempa, 30000);
+    push(chartCahaya, cahaya);
+    push(chartVPanel, vpanel);
+    push(chartArus, arus);
+    push(chartFrek, frek);
 
-  </script>
+  }, 3000);
+
+};
+</script>
 
 </body>
 </html>
