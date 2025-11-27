@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoring Gempa Jawa & Bali</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .chart-box {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Monitoring Gempa Bumi Jawa & Bali</h1>
+  <p>Data diambil dari BMKG setiap 30 detik</p>
+
+  <div class="container">
+    <div class="chart-box">
+      <canvas id="gempaChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // ---------------- CHART -----------------------
+    const ctx = document.getElementById("gempaChart").getContext("2d");
+
+    const chartData = {
+      labels: [],
+      datasets: [
+        {
+          label: "Magnitudo (M)",
+          borderColor: "rgb(255, 100, 100)",
+          borderWidth: 2,
+          data: []
+        },
+        {
+          label: "Kedalaman (Km)",
+          borderColor: "rgb(100, 200, 255)",
+          borderWidth: 2,
+          data: []
+        }
+      ]
+    };
+
+    const gempaChart = new Chart(ctx, {
+      type: "line",
+      data: chartData,
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+
+
+    // --------------- GET DATA BMKG ---------------
+    async function ambilDataGempa() {
+      try {
+        const response = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json");
+        const data = await response.json();
+
+        const list = data.Infogempa.gempa;
+
+        // Filter wilayah Jawa dan Bali
+        const wilayahFilter = ["JAWA", "JAWA", "BALI"];
+
+        const terbaru = list.filter(g =>
+          g.Wilayah.toUpperCase().includes("JAWA") ||
+          g.Wilayah.toUpperCase().includes("BALI")
+        )[0];
+
+        if (!terbaru) return;
+
+        const waktu = terbaru.Jam;
+        const magnitudo = parseFloat(terbaru.Magnitude);
+        const kedalaman = parseFloat(terbaru.Kedalaman);
+
+        // Masukkan ke chart
+        chartData.labels.push(waktu);
+        chartData.datasets[0].data.push(magnitudo);
+        chartData.datasets[1].data.push(kedalaman);
+
+        if (chartData.labels.length > 20) {
+          chartData.labels.shift();
+          chartData.datasets.forEach(ds => ds.data.shift());
+        }
+
+        gempaChart.update();
+
+      } catch (error) {
+        console.log("Gagal ambil data:", error);
+      }
+    }
+
+    // Update setiap 30 detik
+    ambilDataGempa();
+    setInterval(ambilDataGempa, 30000);
+
+  </script>
+
+</body>
+</html>
