@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitoring Panel Surya - Simulasi</title>
+  <title>Monitoring Laut - Simulasi</title>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -37,47 +37,47 @@
 </head>
 <body>
 
-<h2>Monitoring Panel Surya - Gauge + Grafik</h2>
+<h2>Monitoring Laut - Gauge + Grafik</h2>
 
 <div class="row">
 
-  <!-- Intensitas Cahaya -->
+  <!-- KEDALAMAN -->
   <div class="box">
-    <canvas id="gaugeCahaya" width="160" height="400"
+    <canvas id="gaugeDepth" width="160" height="400"
       data-type="linear-gauge"
       data-min-value="0"
-      data-max-value="1000"
-      data-major-ticks="0,200,400,600,800,1000"
-      data-units="Lux"
-      data-title="Intensitas Cahaya"
+      data-max-value="200"
+      data-major-ticks="0,40,80,120,160,200"
+      data-units="Meter"
+      data-title="Kedalaman Laut"
       data-bar-width="15"
       data-glow="true">
     </canvas>
   </div>
 
-  <!-- Tegangan Panel -->
+  <!-- TEKANAN -->
   <div class="box">
-    <canvas id="gaugeVPanel" width="250" height="250"
+    <canvas id="gaugePressure" width="250" height="250"
       data-type="radial-gauge"
-      data-min-value="0"
-      data-max-value="30"
-      data-major-ticks="0,5,10,15,20,25,30"
-      data-title="Tegangan Panel Surya"
-      data-units="V"
+      data-min-value="1"
+      data-max-value="25"
+      data-major-ticks="1,5,10,15,20,25"
+      data-title="Tekanan"
+      data-units="atm"
       data-animation="true"
       data-glow="true">
     </canvas>
   </div>
 
-  <!-- Arus Beban -->
+  <!-- OKSIGEN -->
   <div class="box">
-    <canvas id="gaugeArus" width="250" height="250"
+    <canvas id="gaugeOksigen" width="250" height="250"
       data-type="radial-gauge"
       data-min-value="0"
-      data-max-value="20"
-      data-major-ticks="0,4,8,12,16,20"
-      data-title="Arus Beban"
-      data-units="A"
+      data-max-value="10"
+      data-major-ticks="0,2,4,6,8,10"
+      data-title="Oksigen Terlarut"
+      data-units="mg/L"
       data-animation="true"
       data-glow="true">
     </canvas>
@@ -85,12 +85,11 @@
 
 </div>
 
-<!-- HANYA GRAFIK SAJA -->
+<!-- GRAFIK -->
 <div class="row">
-  <div class="box"><canvas id="chartCahaya" width="350" height="200"></canvas><h3>Grafik Intensitas Cahaya</h3></div>
-  <div class="box"><canvas id="chartVPanel" width="350" height="200"></canvas><h3>Grafik Tegangan Panel</h3></div>
-  <div class="box"><canvas id="chartArus" width="350" height="200"></canvas><h3>Grafik Arus Beban</h3></div>
-  <div class="box"><canvas id="chartFrek" width="350" height="200"></canvas><h3>Grafik Frekuensi</h3></div>
+  <div class="box"><canvas id="chartDepth" width="350" height="200"></canvas><h3>Grafik Kedalaman</h3></div>
+  <div class="box"><canvas id="chartPressure" width="350" height="200"></canvas><h3>Grafik Tekanan</h3></div>
+  <div class="box"><canvas id="chartOksigen" width="350" height="200"></canvas><h3>Grafik Oksigen</h3></div>
 </div>
 
 
@@ -98,9 +97,9 @@
 window.onload = function () {
 
   // GAUGES
-  let gCahaya = document.gauges.get('gaugeCahaya');
-  let gVPanel = document.gauges.get('gaugeVPanel');
-  let gArus   = document.gauges.get('gaugeArus');
+  let gDepth    = document.gauges.get('gaugeDepth');
+  let gPressure = document.gauges.get('gaugePressure');
+  let gOxygen   = document.gauges.get('gaugeOksigen');
 
   // CHART CREATOR
   function createChart(id, min, max) {
@@ -118,25 +117,27 @@ window.onload = function () {
     });
   }
 
-  let chartCahaya = createChart("chartCahaya", 0, 1000);
-  let chartVPanel = createChart("chartVPanel", 0, 30);
-  let chartArus   = createChart("chartArus", 0, 20);
-  let chartFrek   = createChart("chartFrek", 40, 60);
+  let chartDepth    = createChart("chartDepth", 0, 200);
+  let chartPressure = createChart("chartPressure", 1, 25);
+  let chartOxygen   = createChart("chartOksigen", 0, 10);
 
   // UPDATE LOOP (3 detik)
   setInterval(() => {
 
-    let cahaya = Math.random() * 1000;
+    // SIMULASI KEDALAMAN (0–200 m)
+    let depth = Math.random() * 200;
 
-    // PEMBULATAN HANYA 1 DIGIT DI BELAKANG KOMA
-    let vpanel = ((cahaya / 1000) * 30).toFixed(1);
-    let arus   = ((vpanel / 30) * 10).toFixed(1);
-    let frek   = 50.0;
+    // TEKANAN = 1 atm + (0.1 * meter)
+    let pressure = 1 + (depth / 10);
+
+    // OKSIGEN: makin dalam makin sedikit (model sederhana)
+    let oxygen = 8.5 - (depth * 0.02);
+    if (oxygen < 3) oxygen = 3; // batas minimum biologis
 
     // Update Gauges
-    gCahaya.value = cahaya;
-    gVPanel.value = Number(vpanel);
-    gArus.value   = Number(arus);
+    gDepth.value    = depth;
+    gPressure.value = pressure;
+    gOxygen.value   = oxygen;
 
     // Update Grafik
     function push(chart, val) {
@@ -145,10 +146,9 @@ window.onload = function () {
       chart.update();
     }
 
-    push(chartCahaya, cahaya);
-    push(chartVPanel, vpanel);
-    push(chartArus, arus);
-    push(chartFrek, frek);
+    push(chartDepth, depth);
+    push(chartPressure, pressure.toFixed(2));
+    push(chartOxygen, oxygen.toFixed(2));
 
   }, 3000);
 
