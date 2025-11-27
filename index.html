@@ -104,20 +104,22 @@ window.onload = function () {
 
   // CHART CREATOR
   function createChart(id, min, max) {
-    return new Chart(document.getElementById(id).getContext("2d"), {
-      type: 'line',
-      data: {
-        labels: Array(20).fill(""),
-        datasets: [{
-          data: Array(20).fill(0),
-          borderWidth: 2,
-          tension: 0.3
-        }]
-      },
-      options: { animation: false, scales: { y: { min, max }} }
-    });
-  }
-
+  return new Chart(document.getElementById(id).getContext("2d"), {
+    type: 'line',
+    data: {
+      labels: Array(20).fill(""),
+      datasets: [{
+        data: Array(20).fill(0),
+        borderWidth: 2,
+        tension: 0.3,
+        borderColor: "red",      // ← WARNA GARIS MERAH
+        backgroundColor: "red"   // ← WARNA TITIK MERAH
+      }]
+    },
+    options: { animation: false, scales: { y: { min, max }} }
+  });
+}
+  
   let chartDepth    = createChart("chartDepth", 0, 200);
   let chartPressure = createChart("chartPressure", 1, 25);
   let chartOxygen   = createChart("chartOksigen", 0, 10);
