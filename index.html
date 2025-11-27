@@ -38,7 +38,7 @@
       margin-bottom: 30px;
     }
     .box {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       padding: 15px;
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -59,11 +59,12 @@
     .chart-info {
       margin-top: 10px;
       font-size: 14px;
-      color: #333;
+      color: #333; /* Changed from white to black for better readability */
       max-width: 350px;
+      text-align: left;
     }
     .info-panel {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
@@ -74,8 +75,16 @@
       margin-top: 0;
     }
     .info-panel p {
-      color: #333;
+      color: #333; /* Changed from white to black for better readability */
       line-height: 1.5;
+    }
+    h3 {
+      color: #333; /* Changed from white to black for better readability */
+    }
+    .parameter-title {
+      color: #333; /* Changed from white to black for better readability */
+      font-weight: bold;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -105,7 +114,8 @@
       </canvas>
     </div>
     <div class="chart-info">
-      <strong>Kedalaman Laut:</strong> Menunjukkan jarak vertikal dari permukaan laut ke dasar laut. Nilai berkisar antara 0-200 meter.
+      <div class="parameter-title">Kedalaman Laut</div>
+      Menunjukkan jarak vertikal dari permukaan laut ke dasar laut. Nilai berkisar antara 0-200 meter. Kedalaman mempengaruhi tekanan dan kadar oksigen dalam air.
     </div>
   </div>
 
@@ -125,7 +135,8 @@
       </canvas>
     </div>
     <div class="chart-info">
-      <strong>Tekanan:</strong> Menunjukkan tekanan hidrostatik pada kedalaman tertentu. Tekanan meningkat sekitar 1 atm setiap 10 meter kedalaman.
+      <div class="parameter-title">Tekanan Hidrostatik</div>
+      Menunjukkan tekanan hidrostatik pada kedalaman tertentu. Tekanan meningkat sekitar 1 atm setiap 10 meter kedalaman. Tekanan tinggi dapat mempengaruhi organisme laut.
     </div>
   </div>
 
@@ -145,7 +156,8 @@
       </canvas>
     </div>
     <div class="chart-info">
-      <strong>Oksigen Terlarut:</strong> Menunjukkan konsentrasi oksigen yang terlarut dalam air. Nilai ini menurun seiring bertambahnya kedalaman.
+      <div class="parameter-title">Oksigen Terlarut</div>
+      Menunjukkan konsentrasi oksigen yang terlarut dalam air. Nilai ini menurun seiring bertambahnya kedalaman karena berkurangnya cahaya matahari dan aktivitas fotosintesis.
     </div>
   </div>
 
@@ -159,7 +171,7 @@
     </div>
     <h3>Grafik Kedalaman</h3>
     <div class="chart-info">
-      Grafik ini menunjukkan perubahan kedalaman laut dari waktu ke waktu. Kedalaman mempengaruhi tekanan dan kadar oksigen.
+      Grafik ini menunjukkan perubahan kedalaman laut dari waktu ke waktu. Kedalaman bervariasi karena pengaruh arus laut, pasang surut, dan topografi dasar laut.
     </div>
   </div>
   <div class="box">
@@ -168,7 +180,7 @@
     </div>
     <h3>Grafik Tekanan</h3>
     <div class="chart-info">
-      Grafik ini menunjukkan perubahan tekanan hidrostatik. Tekanan berbanding lurus dengan kedalaman laut.
+      Grafik ini menunjukkan perubahan tekanan hidrostatik. Tekanan berbanding lurus dengan kedalaman laut. Perubahan tekanan mempengaruhi organisme laut dan peralatan bawah air.
     </div>
   </div>
   <div class="box">
@@ -177,16 +189,17 @@
     </div>
     <h3>Grafik Oksigen Terlarut</h3>
     <div class="chart-info">
-      Grafik ini menunjukkan perubahan kadar oksigen terlarut. Oksigen berkurang seiring bertambahnya kedalaman.
+      Grafik ini menunjukkan perubahan kadar oksigen terlarut. Oksigen berkurang seiring bertambahnya kedalaman. Kadar oksigen yang rendah dapat membatasi kehidupan laut.
     </div>
   </div>
 </div>
 
 <div class="info-panel">
-  <h3>Hubungan Antar Parameter</h3>
-  <p><strong>Kedalaman vs Tekanan:</strong> Tekanan hidrostatik meningkat sekitar 1 atmosfer setiap 10 meter kedalaman. Hubungan ini bersifat linear.</p>
-  <p><strong>Kedalaman vs Oksigen:</strong> Kadar oksigen terlarut umumnya menurun seiring bertambahnya kedalaman karena berkurangnya cahaya matahari dan aktivitas fotosintesis.</p>
-  <p><strong>Tekanan vs Oksigen:</strong> Tekanan tinggi pada kedalaman yang besar dapat mempengaruhi kelarutan gas, termasuk oksigen, dalam air laut.</p>
+  <h3>Hubungan Antar Parameter Laut</h3>
+  <p><strong>Kedalaman vs Tekanan:</strong> Tekanan hidrostatik meningkat sekitar 1 atmosfer setiap 10 meter kedalaman. Hubungan ini bersifat linear dan dapat dihitung dengan rumus P = 1 + (kedalaman/10) atm.</p>
+  <p><strong>Kedalaman vs Oksigen:</strong> Kadar oksigen terlarut umumnya menurun seiring bertambahnya kedalaman karena berkurangnya cahaya matahari dan aktivitas fotosintesis oleh fitoplankton.</p>
+  <p><strong>Tekanan vs Oksigen:</strong> Tekanan tinggi pada kedalaman yang besar dapat mempengaruhi kelarutan gas, termasuk oksigen, dalam air laut. Namun, efek ini biasanya lebih kecil dibandingkan pengaruh suhu dan salinitas.</p>
+  <p><strong>Pentingnya Monitoring:</strong> Memantau parameter ini penting untuk penelitian kelautan, operasi penyelaman, eksplorasi bawah air, dan memahami ekosistem laut.</p>
 </div>
 
 <script>
@@ -229,11 +242,17 @@ window.onload = function () {
             max,
             grid: {
               color: 'rgba(0,0,0,0.1)'
+            },
+            ticks: {
+              color: '#333' // Changed from white to black for better readability
             }
           },
           x: {
             grid: {
               display: false
+            },
+            ticks: {
+              color: '#333' // Changed from white to black for better readability
             }
           }
         } 
